@@ -5,7 +5,7 @@ from aiogram.filters import Command
 from tg_bot.db import db_commands as db
 from tg_bot.loader import bot
 from tg_bot.settings_logger import logger
-from tg_bot.states.all_states import StateUser
+# from tg_bot.states.all_states import StateUser
 from tg_bot.keyboards import inline as inline_kb
 from tg_bot.misc.utils import check_sub_channel
 from tg_bot.misc import constants as const
@@ -73,10 +73,10 @@ async def command_start(message: types.Message, state: FSMContext):
 @base_reg_router.callback_query(F.data == "sub_channel_done")
 async def sub_channel_done(call: types.CallbackQuery, state: FSMContext):
     """Удаляет кнопку "Подписаться", если пользователь подписался,
-    создает учетную запись пользователя и перенаправляет в основное меню.
-    """
+    создает учетную запись пользователя и перенаправляет в основное меню."""
 
-    await bot.delete_message(call.from_user.id, call.message.message_id)
+    # await bot.delete_message(call.from_user.id, call.message.message_id)
+    await call.message.delete()  # Проверить работу!
     if check_sub_channel(
         await bot.get_chat_member(
             chat_id=const.CHANNEl_ID, user_id=call.from_user.id)):

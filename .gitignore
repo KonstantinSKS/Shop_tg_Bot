@@ -173,3 +173,6 @@ cython_debug/
 # migrations
 /admin_panel/telegram/migrations/
 /migrations/
+
+# mediafiles
+/admin_panel/media/

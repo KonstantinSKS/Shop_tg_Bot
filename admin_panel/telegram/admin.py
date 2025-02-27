@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
 
-from admin_panel.telegram.models import TgUser
+from admin_panel.telegram.models import TgUser, Product, Category, Subcategory
 
 
 admin.site.unregister(Group)
@@ -25,3 +25,38 @@ class TgUserAdmin(admin.ModelAdmin):
             return self.readonly_fields + (
                 'id', 'username', 'bot_unblocked', 'is_subscribed')
         return self.readonly_fields
+
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = (
+        'title',
+        'price',
+        'image',
+        'subcategory',
+    )
+    list_filter = (
+        'title',
+        'subcategory',)
+    search_fields = ('title',)
+
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'title',
+    )
+    search_fields = ('title',)
+    list_filter = ('title',)
+
+
+@admin.register(Subcategory)
+class SubcategoryAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'title',
+        'category',
+    )
+    search_fields = ('title',)
+    list_filter = ('category',)

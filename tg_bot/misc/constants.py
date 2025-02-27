@@ -8,6 +8,8 @@ CHANNEl_ID = '@test_channel_for_shop_tg_bot'  # '-1002357580808'
 CHANNEL_URL = 'https://t.me/test_channel_for_shop_tg_bot'
 # kb_list = [{'label': 'Легкий путь в Python', 'url': 'https://t.me/PythonPathMaster'}]
 NOT_SUB_MESSAGE = "Для доступа к функционалу бота подпишитесь на канал!"
+CATEGORIES_PER_PAGE: int = 5
+
 API_TOKEN_CHECK_URL = os.getenv('API_TOKEN_CHECK_URL')
 GET_SERVICES_URL = os.getenv('GET_SERVICES_URL')
 IMEI_CHECK_URL = os.getenv('IMEI_CHECK_URL')
