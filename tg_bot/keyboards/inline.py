@@ -1,9 +1,10 @@
-from aiogram.types import InlineKeyboardButton
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from tg_bot.misc import constants as const
 from .pagination import paginate_items
 
+from math import ceil
 
 BUTTON_BACK_MAIN_MENU = InlineKeyboardButton(
     text="В главное Меню 📋", callback_data="back_main_menu"
@@ -94,6 +95,25 @@ def subcategories_kb(subcategories, category_id, page=1):
         subcategories, page, const.PAGINATION_ITEMS, f"category_{category_id}")
 
     for subcategory in paginated_subcategories:
+        builder.button(
+            text=subcategory.title,
+            callback_data=f"subcategory_{subcategory.id}"
+        )
+
+    if pagination_buttons:
+        builder.row(*pagination_buttons)
+
+    builder.row(BUTTONS_BACK_STEP, BUTTON_BACK_MAIN_MENU)
+    return builder.as_markup()
+
+def product_kb(products, products_id, page=1):
+    """Создает клавиатуру с товарами и кнопками управления."""
+
+    builder = InlineKeyboardBuilder()
+    paginated_products, pagination_buttons = paginate_items(
+        products, page, const.PAGINATION_ITEMS, f"products_{products_id}")
+
+    for subcategory in paginated_products:
         builder.button(
             text=subcategory.title,
             callback_data=f"subcategory_{subcategory.id}"
