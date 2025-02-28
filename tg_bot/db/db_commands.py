@@ -51,3 +51,24 @@ def get_all_categories():  # НАДО
     """Возвращает все категории товаров."""
 
     return Category.objects.all()
+
+
+@sync_to_async
+def get_category(category_id):  # НАДО
+    """Возвращает экземпляр требуемой категории по id."""
+
+    return Category.objects.filter(id=category_id).first()
+
+
+@sync_to_async
+def get_all_subcategories(category_id):  # НАДО
+    """Возвращает все связанные подкатегории товаров."""
+
+    return Subcategory.objects.filter(category_id=category_id)
+
+
+@sync_to_async
+def get_subcategory(subcategory_id):  # НАДО
+    """Возвращает экземпляр требуемой подкатегории по id."""
+
+    return Subcategory.objects.filter(id=subcategory_id).first()
