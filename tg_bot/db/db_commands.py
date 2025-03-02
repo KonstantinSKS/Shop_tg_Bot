@@ -82,6 +82,13 @@ def get_all_products(subcategory_id):  # НАДО
 
 
 @sync_to_async
+def get_related_product(subcategory_id):  # НАДО
+    """Возвращает экземпляр товара связанного с подкатегорией по id."""
+
+    return Product.objects.filter(subcategory__id=subcategory_id).first()
+
+
+@sync_to_async
 def get_product(product_id):  # НАДО
     """Возвращает экземпляр требуемого товара по id."""
 

@@ -19,4 +19,7 @@ class BackCallback(CallbackData, prefix="back_step"):
     # page: int = 1
 
 
-# class ProductCallback(CallbackData, prefix="product"):
+class ProductCallback(CallbackData, prefix="product"):
+    subcategory_id: int
+    product_id: int
+    page: int
