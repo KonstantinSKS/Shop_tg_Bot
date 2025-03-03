@@ -1,9 +1,10 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from tg_bot.misc import constants as const
-from .pagination import paginate_items, paginate_subcategories, paginate_products
-from .callback_data import CategoriesCallback, SubcategoryCallback, BackCallback
+from .pagination import paginate_items, paginate_subcategories
+from .callback_data import (
+    CategoriesCallback, SubcategoryCallback, ProductItemCallback, BackCallback)
 
 
 BUTTON_BACK_MAIN_MENU = InlineKeyboardButton(
@@ -39,30 +40,6 @@ def main_menu():
     return keyboard.as_markup()
 
 
-# def back_main_menu():
-#     """Вернуться в главное меню."""
-
-#     keyboard = InlineKeyboardBuilder()
-#     keyboard.add(BUTTON_BACK_MAIN_MENU)
-#     return keyboard.as_markup()
-
-
-# def back_step():
-#     """Вернуться на шаг назад и вернуться в главное меню."""
-
-#     keyboard = builder_back_step_and_main_menu()
-#     return keyboard.as_markup()
-
-
-# def builder_back_step_and_main_menu():
-#     """Builder для кнопок Назад и Меню."""
-
-#     keyboard = InlineKeyboardBuilder()
-#     keyboard.add(BUTTONS_BACK_STEP)
-#     keyboard.add(BUTTON_BACK_MAIN_MENU)
-#     return keyboard.adjust(1)
-
-
 def channels_kb(channel_url: str):
     """Подписаться на канал."""
 
@@ -86,7 +63,7 @@ def categories_kb(categories, page=1):
     for category in paginated_categories:
         builder.button(
             text=category.title,
-            callback_data=SubcategoryCallback(category_id=category.id, page=1, level="subcategories").pack() # f"category_{category.id}"
+            callback_data=SubcategoryCallback(category_id=category.id, page=1, level="subcategories").pack()
         )
 
     if pagination_buttons:
@@ -102,13 +79,14 @@ def subcategories_kb(subcategories, category_id, page=1):
     builder = InlineKeyboardBuilder()
     paginated_subcategories, pagination_buttons = paginate_subcategories(
         subcategories, category_id, page, const.PAGINATION_ITEMS)
-    print("category_id:", category_id)
-    print("page inline:", page)
 
     for subcategory in paginated_subcategories:
         builder.button(
             text=subcategory.title,
-            callback_data=f"subcategory_{subcategory.id}"
+            callback_data=ProductItemCallback(
+                subcategory_id=subcategory.id,
+                product_index=1
+            ).pack()
         )
 
     if pagination_buttons:
@@ -123,26 +101,32 @@ def subcategories_kb(subcategories, category_id, page=1):
     return builder.as_markup()
 
 
-def product_kb(products_id, subcategory_id, page=1):
-    """Создает клавиатуру с товарами и кнопками управления."""
+def product_item_kb(subcategory_id, product_index, total_products, category_id):
+    """Создает клавиатуру для навигации по товарам в подкатегории."""
 
     builder = InlineKeyboardBuilder()
-    pagination_buttons = paginate_products(  # paginated_products,
-        # products,
-        page,
-        # const.PAGINATION_ITEMS,
-        f"products_{subcategory_id}")
-    print("products_id:", products_id)
-    print("page inline:", page)
+    if product_index > 1:
+        builder.button(
+            text="⬅ Назад",
+            callback_data=ProductItemCallback(
+                subcategory_id=subcategory_id,
+                product_index=product_index - 1
+            ).pack()
+        )
 
-    # for product in paginated_products:
-    #     builder.button(
-    #         text=product.title,
-    #         callback_data=f"products_{product.id}"
-    #     )
+    if product_index < total_products:
+        builder.button(
+            text="Вперед ➡",
+            callback_data=ProductItemCallback(
+                subcategory_id=subcategory_id,
+                product_index=product_index + 1
+            ).pack()
+        )
+    print("callback_data:", category_id)
+    BACK_BUTTON = InlineKeyboardButton(
+        text="Назад ↩️",
+        callback_data=SubcategoryCallback(category_id=category_id, page=1, level="subcategories").pack()
+    )
 
-    if pagination_buttons:
-        builder.row(*pagination_buttons)
-
-    builder.row(button_back_step("subcategory"), BUTTON_BACK_MAIN_MENU)
+    builder.row(BACK_BUTTON, BUTTON_BACK_MAIN_MENU)
     return builder.as_markup()

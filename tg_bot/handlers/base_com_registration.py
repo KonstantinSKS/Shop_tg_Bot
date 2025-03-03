@@ -75,8 +75,7 @@ async def sub_channel_done(call: types.CallbackQuery, state: FSMContext):
     """Удаляет кнопку "Подписаться", если пользователь подписался,
     создает учетную запись пользователя и перенаправляет в основное меню."""
 
-    # await bot.delete_message(call.from_user.id, call.message.message_id)
-    await call.message.delete()  # Проверить работу!
+    await call.message.delete()
     if check_sub_channel(
         await bot.get_chat_member(
             chat_id=const.CHANNEl_ID, user_id=call.from_user.id)):
