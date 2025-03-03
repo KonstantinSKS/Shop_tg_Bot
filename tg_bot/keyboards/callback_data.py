@@ -25,6 +25,12 @@ class ProductItemCallback(CallbackData, prefix="product_item"):
     product_index: int
 
 
+class ProductActionCallback(CallbackData, prefix="product_action"):
+    subcategory_id: int
+    product_index: int
+    action: str
+
+
 class ProductAction(IntEnum):
     details = auto()
 

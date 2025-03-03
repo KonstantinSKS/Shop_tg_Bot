@@ -4,7 +4,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from tg_bot.misc import constants as const
 from .pagination import paginate_items, paginate_subcategories
 from .callback_data import (
-    CategoriesCallback, SubcategoryCallback, ProductItemCallback, BackCallback)
+    CategoriesCallback, SubcategoryCallback, ProductItemCallback,
+    ProductActionCallback, BackCallback)
 
 
 BUTTON_BACK_MAIN_MENU = InlineKeyboardButton(
@@ -63,7 +64,8 @@ def categories_kb(categories, page=1):
     for category in paginated_categories:
         builder.button(
             text=category.title,
-            callback_data=SubcategoryCallback(category_id=category.id, page=1, level="subcategories").pack()
+            callback_data=SubcategoryCallback(
+                category_id=category.id, page=1, level="subcategories").pack()
         )
 
     if pagination_buttons:
@@ -93,7 +95,7 @@ def subcategories_kb(subcategories, category_id, page=1):
         builder.row(*pagination_buttons)
 
     BACK_BUTTON = InlineKeyboardButton(
-        text="Назад ↩️",
+        text="↩️ В предыдущий раздел",
         callback_data=CategoriesCallback(level="categories", page=1).pack()
     )
 
@@ -105,28 +107,66 @@ def product_item_kb(subcategory_id, product_index, total_products, category_id):
     """Создает клавиатуру для навигации по товарам в подкатегории."""
 
     builder = InlineKeyboardBuilder()
-    if product_index > 1:
-        builder.button(
-            text="⬅ Назад",
-            callback_data=ProductItemCallback(
+    builder.row(
+        InlineKeyboardButton(
+            text="Добавить в корзину",
+            callback_data=ProductActionCallback(
                 subcategory_id=subcategory_id,
-                product_index=product_index - 1
+                product_index=product_index,
+                action="add"
+            ).pack()
+        ),
+        InlineKeyboardButton(
+            text="Указать кол-во",
+            callback_data=ProductActionCallback(
+                subcategory_id=subcategory_id,
+                product_index=product_index,
+                action="set_quantity"
+            ).pack()
+        ),
+        InlineKeyboardButton(
+            text="Подтвердить",
+            callback_data=ProductActionCallback(
+                subcategory_id=subcategory_id,
+                product_index=product_index,
+                action="confirm"
             ).pack()
         )
-
-    if product_index < total_products:
-        builder.button(
-            text="Вперед ➡",
-            callback_data=ProductItemCallback(
-                subcategory_id=subcategory_id,
-                product_index=product_index + 1
-            ).pack()
-        )
-    print("callback_data:", category_id)
-    BACK_BUTTON = InlineKeyboardButton(
-        text="Назад ↩️",
-        callback_data=SubcategoryCallback(category_id=category_id, page=1, level="subcategories").pack()
     )
 
-    builder.row(BACK_BUTTON, BUTTON_BACK_MAIN_MENU)
+    pagination_buttons = []
+    if product_index > 1:
+        pagination_buttons.append(
+            InlineKeyboardButton(
+                text="⬅ Назад",
+                callback_data=ProductItemCallback(
+                    subcategory_id=subcategory_id,
+                    product_index=product_index - 1
+                ).pack()
+            )
+        )
+    if product_index < total_products:
+        pagination_buttons.append(
+            InlineKeyboardButton(
+                text="Вперед ➡",
+                callback_data=ProductItemCallback(
+                    subcategory_id=subcategory_id,
+                    product_index=product_index + 1
+                ).pack()
+            )
+        )
+    if pagination_buttons:
+        builder.row(*pagination_buttons)
+
+    builder.row(
+        InlineKeyboardButton(
+            text="↩️ В предыдущий раздел",
+            callback_data=SubcategoryCallback(
+                category_id=category_id,
+                page=1,
+                level="subcategories").pack()
+        ),
+        BUTTON_BACK_MAIN_MENU
+    )
+
     return builder.as_markup()

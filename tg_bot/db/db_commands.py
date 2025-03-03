@@ -2,7 +2,7 @@ from aiogram.types.user import User
 from asgiref.sync import sync_to_async
 from django.contrib.auth.models import User as Model_User
 
-from admin_panel.telegram.models import TgUser, Product, Category, Subcategory
+from admin_panel.telegram.models import TgUser, Product, Category, Subcategory, ShoppingCart, ShoppingCartProducts
 
 
 @sync_to_async()
@@ -93,3 +93,23 @@ def get_product(product_id):  # НАДО
     """Возвращает экземпляр требуемого товара по id."""
 
     return Product.objects.filter(id=product_id).first()
+
+
+@sync_to_async
+def create_or_add_to_cart(user: TgUser, product_data: list):  # НАДО
+    """Создает корзину (если не создана) для пользователя.
+    Добавляет продукты."""
+
+    cart, created = ShoppingCart.objects.get_or_create(user=user)
+    for product_data in product_data:
+        product_id = product_data.get('id')
+        quantity = product_data.get('quantity', 1)
+        cart_product, cp_created = ShoppingCartProducts.objects.get_or_create(
+            shopping_cart=cart,
+            product_id=product_id,
+            defaults={'quantity': quantity}
+        )
+        if not cp_created:
+            cart_product.quantity += quantity
+            cart_product.save()
+    return cart
