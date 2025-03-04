@@ -1,6 +1,7 @@
 volumes:
   pg_data:
   static:
+  media:
 
 services:
 
@@ -21,6 +22,7 @@ services:
     env_file: .env
     volumes:
       - static:/backend_static
+      - media:/app/admin_panel/media
     depends_on:
       db:
         condition: service_healthy
@@ -36,6 +38,9 @@ services:
     build: ./
     depends_on:
        - backend
+       - redis
+    volumes:
+      - media:/app/admin_panel/media
     command: >
       sh -c "python bot.py"
     restart: always
@@ -45,6 +50,7 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/templates/default.conf.template
       - static:/staticfiles/
+      - media:/app/admin_panel/media
     depends_on:
       db:
         condition: service_healthy

@@ -1,6 +1,3 @@
-from enum import IntEnum, auto
-from typing import Optional
-
 from aiogram.filters.callback_data import CallbackData
 
 
@@ -31,12 +28,14 @@ class ProductActionCallback(CallbackData, prefix="product_action"):
     action: str
 
 
-class ProductAction(IntEnum):
-    details = auto()
+class CartItemCallback(CallbackData, prefix="cart_item"):
+    product_id: int
+    action: str
+
+
+class CartCallback(CallbackData, prefix="cart"):
+    action: str
 
 
 class BackCallback(CallbackData, prefix="back_step"):
-    level: str  # уровень (например, "catalog", "category", "subcategory")
-    # category_id: int = None  # ID категории (если есть)
-    # subcategory_id: int = None  # ID подкатегории (если есть)
-    # page: int = 1
+    level: str

@@ -4,34 +4,51 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-CHANNEl_ID = '@test_channel_for_shop_tg_bot'  # '-1002357580808'
-CHANNEL_URL = 'https://t.me/test_channel_for_shop_tg_bot'
-# kb_list = [{'label': 'Легкий путь в Python', 'url': 'https://t.me/PythonPathMaster'}]
+CHANNEL_URL = os.getenv('CHANNEL_URL')
+CHANNEl_ID = os.getenv('CHANNEl_ID')
 NOT_SUB_MESSAGE = "Для доступа к функционалу бота подпишитесь на канал!"
-PAGINATION_ITEMS: int = 3
 
-API_TOKEN_CHECK_URL = os.getenv('API_TOKEN_CHECK_URL')
-GET_SERVICES_URL = os.getenv('GET_SERVICES_URL')
-IMEI_CHECK_URL = os.getenv('IMEI_CHECK_URL')
+FAQ_LIST = {
+    "Для чего этот бот?": "Бот Shop_tg_Bot предназначен для покупок товаров онлайн",
+    "Как пользоваться ботом?": "Выберите категорию, а затем подкатегорию товара, добавте нужный товар в корзину.",
+    "Можно ли добавить или удалить товар из корзины?": 
+        "Да, добавление количества товара доступно при просмотре товаров и также в самой корзине.",
+    "Можно ли отказаться от покупки?":
+        "Да, если вы передумали, то просто вернитесь на шаг назад или вернитесь в главное меню.",
+    "Я ввел неправильный адрес доставки, что делать?": "Прсто вернитесь на шаг назад и заполните адрес снова.",
+    "Как перезапустить бот?": "введите команду /start",
+}
 
-HELP_TEXT = ("Бот для проверки IMEI устройств.\n"
-             "Авторизируйтесь по одному из API-токенов "
-             "(API Sandbox или API Live).\n"
-             "Бот проверит, подойдет ли ваш API-токен для использования "
-             "на бесплатном сервисе по проверке IMEI устройств\n"
-             "Если для токена не будет найден бесплатный сервис, "
-             "то Бот предложит вам ввести другой токен.\n "
+HELP_TEXT = ("Бот для покупки товаров.\n"
+             "Использование функционала бота"
+             "возможно после подписки на канал.\n"
              "Для запуска или перезапуска бота нажмите /start"
              )
 
 
-class CheckHeadersConst(object):
-    """Константа для работы с API-сервисом."""
-
-    @staticmethod
-    def headers(text: str) -> dict:
-        return {
-            'Authorization': f'Bearer {text}',
-            'Accept-Language': 'en',
-            'Content-Type': 'application/json',
-        }
+# {
+#     "provider_data" : {
+#         "receipt" : {
+#             "customer" : {
+#                 "full_name" : "Ivanov Ivan Ivanovich",
+#                 "email" : "example@example.com",
+#                 "phone" : "79211234567",
+#                 "inn" : "6321341814"
+#             },
+#             "items" : [
+#                 {
+#                     "description" : "Наименование товара",
+#                     "quantity" : 1,
+#                     "amount" : {
+#                         "value" : 100,
+#                         "currency" : "RUB"
+#                     },
+#                     "vat_code" : 1,
+#                     "payment_mode" : "full_payment",
+#                     "payment_subject" : "commodity"
+#                 }
+#             ],
+#             "tax_system_code" : 1
+#         }
+#     }
+# }

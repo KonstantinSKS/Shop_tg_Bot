@@ -5,7 +5,6 @@ from aiogram.filters import Command
 from tg_bot.db import db_commands as db
 from tg_bot.loader import bot
 from tg_bot.settings_logger import logger
-# from tg_bot.states.all_states import StateUser
 from tg_bot.keyboards import inline as inline_kb
 from tg_bot.misc.utils import check_sub_channel
 from tg_bot.misc import constants as const
@@ -84,6 +83,8 @@ async def sub_channel_done(call: types.CallbackQuery, state: FSMContext):
                 user=call.from_user,
                 is_subscribed=True
             )
+            logger.info(
+                f"Пользователь {call.from_user.full_name} успешно зарегистрирован.")
         await call.message.answer(
             text=f"Здравствуйте, {call.from_user.first_name}! 😊"
         )

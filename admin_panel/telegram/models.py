@@ -193,3 +193,49 @@ class ShoppingCartProducts(models.Model):
     @property
     def total_price(self):
         return self.product.price * self.quantity
+
+
+class DeliveryAddress(models.Model):
+    """Модель адреса доставки."""
+
+    user = models.ForeignKey(
+        TgUser,
+        verbose_name='Пользователь корзины',
+        on_delete=models.CASCADE,
+        related_name='delivery_addresses'
+    )
+    address = models.TextField(
+        verbose_name='Адрес доставки',
+    )
+
+    class Meta:
+        verbose_name = 'Адрес доставки'
+        verbose_name_plural = 'Адрес доставки'
+
+
+class Mailing(models.Model):
+    """Модель рассылки."""
+
+    text = models.TextField(
+        max_length=4096,
+        help_text='Текст рассылки',
+        verbose_name='Текст',
+        blank=True,
+        null=True,
+    )
+    date_mailling = models.DateTimeField(
+        help_text='Дата рассылки',
+        verbose_name='Дата',
+    )
+    is_sent = models.BooleanField(
+        help_text='Статус отправки',
+        verbose_name='Статус отправки',
+        default=False
+    )
+
+    class Meta:
+        verbose_name = 'Рассылки'
+        verbose_name_plural = 'Рассылки'
+
+    def __str__(self):
+        return str(self.pk)

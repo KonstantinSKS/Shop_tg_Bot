@@ -4,8 +4,7 @@ from aiogram.utils.markdown import hbold, hitalic
 from aiogram import types, Router
 
 from tg_bot.db import db_commands as db
-# from tg_bot.loader import bot
-# from tg_bot.settings_logger import logger
+from tg_bot.settings_logger import logger
 from tg_bot.states.all_states import StateShop
 from tg_bot.keyboards import inline as inline_kb
 from tg_bot.keyboards.callback_data import (
@@ -22,11 +21,11 @@ async def get_categories(
         state: FSMContext):
     """Получение всех категорий товаров с пагинацией."""
 
-    print("state:", state)
-    await state.clear()  # Проверить!!!
+    await state.clear()
     categories = await db.get_all_categories()
     if not categories:
         await call.answer("❌ Категории пока отсутствуют.")
+        logger.warning("Категории отсутствуют!")
         return
 
     text = "Выберите категорию:"
@@ -48,11 +47,11 @@ async def show_category(
     subcategories = await db.get_all_subcategories(callback_data.category_id)
     if not subcategories:
         await call.answer("❌ Подкатегории пока отсутствуют.")
+        logger.warning("Подкатегории отсутствуют!")
         return
-    print("state.update_data", state)
-    await state.update_data(category_id=callback_data.category_id)  # Проверить!!!
-    await state.set_state(StateShop.subcategory_selected)  # Проверить!!!
-    print("state.set_state", state)
+
+    await state.update_data(category_id=callback_data.category_id)
+    await state.set_state(StateShop.subcategory_selected)
 
     text = f"*{category.title}*\n\nВыберите подкатегорию:"
     keyboard = inline_kb.subcategories_kb(
@@ -84,19 +83,20 @@ async def show_product(
     products = await db.get_all_products(callback_data.subcategory_id)
     if not products:
         await call.answer("❌ В этой категории пока нет товаров.")
+        logger.warning(f"Товары в подкатегории {callback_data.subcategory_id} отсутствуют!")
         return
 
     products = list(products)
     total_products = len(products)
     product_index = callback_data.product_index
     product = products[product_index - 1]
-    print("state.show_product.update_data", state)
-    await state.update_data(  # Проверить!!!
+
+    await state.update_data(
         subcategory_id=callback_data.subcategory_id,
         product_index=product_index
     )
-    await state.set_state(StateShop.product_view)  # Проверить!!!
-    print("state.show_product.set_state", state)
+    await state.set_state(StateShop.product_view)
+
     text = f"{hbold(product.title)}\n{hitalic(product.description)}\n💰 Цена: {product.price} р."
     keyboard = inline_kb.product_item_kb(
         subcategory_id=callback_data.subcategory_id,

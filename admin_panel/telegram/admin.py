@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
 
-from admin_panel.telegram.models import TgUser, Product, Category, Subcategory
+from admin_panel.telegram.models import TgUser, Product, Category, Subcategory, Mailing
 
 
 admin.site.unregister(Group)
@@ -60,3 +60,14 @@ class SubcategoryAdmin(admin.ModelAdmin):
     )
     search_fields = ('title',)
     list_filter = ('category',)
+
+
+@admin.register(Mailing)
+class MailingAdmin(admin.ModelAdmin):
+    list_display = (
+        'pk',
+        'text',
+        'date_mailling',
+        'is_sent',
+    )
+    readonly_fields = ('is_sent',)

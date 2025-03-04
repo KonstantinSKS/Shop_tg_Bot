@@ -1,9 +1,11 @@
 import asyncio
 from aiogram.types import BotCommand
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from tg_bot.loader import dp, bot
 from tg_bot.config import super_user_name, super_user_pass
 from tg_bot.middlewares.blocking import UserMiddleware
+from tg_bot.misc.mailing import mailing_date
 from tg_bot.settings_logger import logger
 from tg_bot.db.db_commands import create_super_user
 
@@ -27,6 +29,14 @@ async def main():
 
     dp.message.outer_middleware(UserMiddleware())
     dp.callback_query.outer_middleware(UserMiddleware())
+
+    scheduler = AsyncIOScheduler()
+    scheduler.add_job(
+        mailing_date,
+        'interval',
+        minutes=60,
+    )
+    scheduler.start()
 
     try:
         await dp.start_polling(bot)

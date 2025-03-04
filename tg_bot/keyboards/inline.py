@@ -1,11 +1,11 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, FSInputFile
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from tg_bot.misc import constants as const
+from tg_bot.config import PAGINATION_ITEMS
 from .pagination import paginate_items, paginate_subcategories
 from .callback_data import (
-    CategoriesCallback, SubcategoryCallback, ProductItemCallback,
-    ProductActionCallback, BackCallback)
+    CartCallback, CategoriesCallback, SubcategoryCallback, ProductItemCallback,
+    ProductActionCallback, CartItemCallback, BackCallback)
 
 
 BUTTON_BACK_MAIN_MENU = InlineKeyboardButton(
@@ -23,6 +23,29 @@ def button_back_step(level: str) -> InlineKeyboardButton:
     )
 
 
+def back_to_main_menu():
+    """Вазврат в главное меню."""
+
+    keyboard = InlineKeyboardBuilder()
+    keyboard.row(
+        BUTTON_BACK_MAIN_MENU
+    )
+    return keyboard.as_markup()
+
+
+def download_kb() -> InlineKeyboardMarkup:
+    """Кнопка «Скачать Excel»."""
+
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(
+            text="Скачать Excel",
+            callback_data=CartCallback(action="download_excel").pack()
+        )
+    )
+    return builder.as_markup()
+
+
 def main_menu():
     """Главное меню."""
 
@@ -33,10 +56,12 @@ def main_menu():
             callback_data=CategoriesCallback(level="categories", page=1).pack())
     )
     keyboard.row(
-        InlineKeyboardButton(text="Корзина 🛒", callback_data="shopping_cart")
+        InlineKeyboardButton(
+            text="Корзина 🛒",
+            callback_data=CartCallback(action="view").pack())
     )
     keyboard.row(
-        InlineKeyboardButton(text="FAQ", callback_data="faq")
+        InlineKeyboardButton(text="FAQ", callback_data="FAQ")
     )
     return keyboard.as_markup()
 
@@ -59,7 +84,7 @@ def categories_kb(categories, page=1):
 
     builder = InlineKeyboardBuilder()
     paginated_categories, pagination_buttons = paginate_items(
-        categories, page, const.PAGINATION_ITEMS)
+        categories, page, PAGINATION_ITEMS)
 
     for category in paginated_categories:
         builder.button(
@@ -80,7 +105,7 @@ def subcategories_kb(subcategories, category_id, page=1):
 
     builder = InlineKeyboardBuilder()
     paginated_subcategories, pagination_buttons = paginate_subcategories(
-        subcategories, category_id, page, const.PAGINATION_ITEMS)
+        subcategories, category_id, page, PAGINATION_ITEMS)
 
     for subcategory in paginated_subcategories:
         builder.button(
@@ -125,7 +150,7 @@ def product_item_kb(subcategory_id, product_index, total_products, category_id):
             ).pack()
         ),
         InlineKeyboardButton(
-            text="Подтвердить",
+            text="В корзину 🛒",
             callback_data=ProductActionCallback(
                 subcategory_id=subcategory_id,
                 product_index=product_index,
@@ -170,3 +195,63 @@ def product_item_kb(subcategory_id, product_index, total_products, category_id):
     )
 
     return builder.as_markup()
+
+
+def build_cart_message_and_kb(cart):
+    """Создает клавиатуру для управления корзиной."""
+
+    keyboard_builder = InlineKeyboardBuilder()
+    text = "🛒 *Ваша корзина:*\n\n"
+    cart_items = list(cart.cart_products.all())
+    if not cart_items:
+        text += "В корзине нет товаров."
+    else:
+        overall_total = 0
+        for item in cart_items:
+            total_price = item.total_price
+            overall_total += total_price
+            text += (
+                f"• *{item.product.title}*\n"
+                f"  Кол-во: {item.quantity} | Цена: {item.product.price} р. | Сумма: {total_price} р.\n\n"
+            )
+            keyboard_builder.row(
+                InlineKeyboardButton(
+                    text="➖",
+                    callback_data=CartItemCallback(product_id=item.product.id, action="decrease").pack()
+                ),
+                InlineKeyboardButton(
+                    text=f"❌ {item.product.title}",
+                    callback_data=CartItemCallback(product_id=item.product.id, action="remove").pack()
+                ),
+                InlineKeyboardButton(
+                    text="➕",
+                    callback_data=CartItemCallback(product_id=item.product.id, action="increase").pack()
+                )
+            )
+        text += f"*Общая сумма:* {overall_total} р.\n\n"
+
+    keyboard_builder.row(
+        InlineKeyboardButton(
+            text="Оформить заказ",
+            callback_data=CartCallback(action="checkout").pack()),
+        BUTTON_BACK_MAIN_MENU
+    )
+    return text, keyboard_builder.as_markup()
+
+
+def delivery_kb() -> InlineKeyboardMarkup:
+    """Возвращает клавиатуру для подтверждения адреса доставки."""
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(
+            text="Перейти к оплате",
+            callback_data=CartCallback(action="proceed_to_payment").pack())],
+        [
+            InlineKeyboardButton(
+                text="Назад",
+                callback_data=CartCallback(action="back_to_address").pack()
+            ),
+            BUTTON_BACK_MAIN_MENU
+        ]
+    ])
+    return keyboard
