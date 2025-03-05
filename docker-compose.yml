@@ -8,6 +8,8 @@ services:
   db:
     image: postgres:16.6
     env_file: .env
+    networks:
+      - network-bot
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
@@ -32,6 +34,8 @@ services:
      python django_app.py collectstatic --noinput &&
      cp -r /app/admin_panel/collected_static/. /backend_static/static/ &&
      python django_app.py runserver 0:8000"
+    networks:
+      - network-bot
     restart: always
 
   bot:
@@ -41,6 +45,8 @@ services:
        - redis
     volumes:
       - media:/app/admin_panel/media
+    networks:
+      - network-bot
     command: >
       sh -c "python bot.py"
     restart: always
@@ -56,10 +62,18 @@ services:
         condition: service_healthy
     ports:
       - 8080:80
+    networks:
+      - network-bot
     restart: always
 
   redis:
     image: redis:alpine
     env_file:
       - .env
+    networks:
+      - network-bot
     restart: always
+
+networks:
+  network-bot:
+    driver: bridge
