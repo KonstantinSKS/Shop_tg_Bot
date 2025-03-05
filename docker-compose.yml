@@ -33,6 +33,8 @@ services:
      cp -r /app/admin_panel/collected_static/. /backend_static/static/ &&
      python django_app.py runserver 0:8000"
     restart: always
+    ports:
+      - 8080:8000
 
   bot:
     build: ./
